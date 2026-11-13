@@ -33,7 +33,6 @@ def get_first_date(prices):
 def get_last_date(prices):
     return prices[-1]["date"]
 
-
 def main():
     instruments = load_instruments()
     prices = load_prices()
@@ -51,12 +50,14 @@ def main():
     print()
     print("Instrument")
     print(f"{instrument['ticker']} - {instrument['name']}")
+    print(f"Market: {instrument['market']}")
     print(f"First date: {get_first_date(instrument_prices)}")
     print(f"Last date: {get_last_date(instrument_prices)}")
     print(f"Last price: {instrument_latest['close']} {instrument['currency']}")
     print()
     print("Benchmark")
     print(f"{benchmark['ticker']} - {benchmark['name']}")
+    print(f"Market: {benchmark['market']}")
     print(f"First date: {get_first_date(benchmark_prices)}")
     print(f"Last date: {get_last_date(benchmark_prices)}")
     print(f"Last level: {benchmark_latest['close']}")
@@ -67,7 +68,6 @@ def main():
     print("Observations")
     print(f"{instrument['ticker']}: {len(instrument_prices)}")
     print(f"{benchmark['ticker']}: {len(benchmark_prices)}")
-
 
 if __name__ == "__main__":
     main()

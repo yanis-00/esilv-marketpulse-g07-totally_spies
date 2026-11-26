@@ -8,6 +8,7 @@ from analytics import (
     calculate_period_return,
     calculate_relative_performance,
 )
+from providers.yahoo_provider import fetch_yahoo_prices
 
 # MarketPulse - main entry point
 DATA_DIR = Path("data/sample")
@@ -17,6 +18,14 @@ DATA_DIR = Path("data/sample")
 # Parsing YAML is optional and is not required by the 18-hour lab sequence.
 LOOKBACK_LABEL = "1 month"
 INTERVAL_LABEL = "Daily"
+
+# Yahoo-specific request values and symbols (provider boundary).
+YAHOO_PERIOD = "1mo"
+YAHOO_INTERVAL = "1d"
+YAHOO_SYMBOLS = {
+    "AAPL": "AAPL",
+    "SP500": "^GSPC",
+}
 
 
 def load_instruments():
@@ -55,18 +64,22 @@ def get_last_date(prices):
 
 def main():
     instruments = load_instruments()
-    prices = load_prices()
-
-    normalized_prices = [
-        normalize_price_row(row)
-        for row in prices
-    ]
 
     instrument = instruments["instrument"]
     benchmark = instruments["benchmark"]
 
-    instrument_prices = filter_prices(normalized_prices, instrument["ticker"])
-    benchmark_prices = filter_prices(normalized_prices, benchmark["ticker"])
+    instrument_prices = fetch_yahoo_prices(
+        symbol=YAHOO_SYMBOLS[instrument["ticker"]],
+        canonical_ticker=instrument["ticker"],
+        period=YAHOO_PERIOD,
+        interval=YAHOO_INTERVAL,
+    )
+    benchmark_prices = fetch_yahoo_prices(
+        symbol=YAHOO_SYMBOLS[benchmark["ticker"]],
+        canonical_ticker=benchmark["ticker"],
+        period=YAHOO_PERIOD,
+        interval=YAHOO_INTERVAL,
+    )
 
     aligned_instrument, aligned_benchmark = align_series(
         instrument_prices,
@@ -86,9 +99,19 @@ def main():
 
     print("=== MarketPulse ===")
     print()
+    print("Provider")
+    print("Yahoo Finance via yfinance")
+    print()
     print("Market configuration")
-    print(f"Period   : {LOOKBACK_LABEL}")
-    print(f"Interval : {INTERVAL_LABEL}")
+    print(f"Instrument : {instrument['ticker']} - {instrument['name']}")
+    print(f"Benchmark  : {benchmark['ticker']} - {benchmark['name']}")
+    print(f"Period     : {LOOKBACK_LABEL}")
+    print(f"Interval   : {INTERVAL_LABEL}")
+    print(
+        f"Common dates : {get_first_date(aligned_instrument)} -> "
+        f"{get_last_date(aligned_instrument)} "
+        f"({len(aligned_instrument)} observations)"
+    )
     print()
     print("Instrument")
     print(f"{instrument['ticker']} - {instrument['name']}")
@@ -106,12 +129,12 @@ def main():
     print()
     print("Base 100")
     print(
-        f"{instrument['ticker']}  : "
+        f"{instrument['ticker']:<6}: "
         f"{instrument_base_100[0]['value']:.2f} -> "
         f"{instrument_base_100[-1]['value']:.2f}"
     )
     print(
-        f"{benchmark['ticker']} : "
+        f"{benchmark['ticker']:<6}: "
         f"{benchmark_base_100[0]['value']:.2f} -> "
         f"{benchmark_base_100[-1]['value']:.2f}"
     )

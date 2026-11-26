@@ -1,5 +1,4 @@
 from pathlib import Path
-import csv
 import json
 
 
@@ -9,6 +8,8 @@ from analytics import (
     calculate_period_return,
     calculate_relative_performance,
 )
+
+from providers.yahoo_provider import YAHOO_SYMBOLS, fetch_yahoo_prices
 
 
 DATA_DIR = Path("data/sample")
@@ -25,37 +26,24 @@ def load_instruments():
         return json.load(file)
 
 
-def normalize_price_row(row):
-    return {
-        "date": row["date"],
-        "ticker": row["ticker"],
-        "open": float(row["open"]),
-        "high": float(row["high"]),
-        "low": float(row["low"]),
-        "close": float(row["close"]),
-        "volume": int(row["volume"]),
-    }
-
-
-def load_prices():
-    with open(DATA_DIR / "prices.csv", encoding="utf-8") as file:
-        return [normalize_price_row(row) for row in csv.DictReader(file)]
-
-
-def filter_prices(prices, ticker):
-    return [row for row in prices if row["ticker"] == ticker]
-
-
 def main():
     instruments = load_instruments()
-    prices = load_prices()
 
     instrument = instruments["instrument"]
     benchmark = instruments["benchmark"]
     instrument_ticker = instrument["ticker"]
     benchmark_ticker = benchmark["ticker"]
-    instrument_prices = filter_prices(prices, instrument_ticker)
-    benchmark_prices = filter_prices(prices, benchmark_ticker)
+    try:
+        instrument_prices = fetch_yahoo_prices(
+            symbol=YAHOO_SYMBOLS[instrument_ticker],
+            canonical_ticker=instrument_ticker,
+        )
+        benchmark_prices = fetch_yahoo_prices(
+            symbol=YAHOO_SYMBOLS[benchmark_ticker],
+            canonical_ticker=benchmark_ticker,
+        )
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
 
     aligned_instrument, aligned_benchmark = align_series(instrument_prices, benchmark_prices)
     if not aligned_instrument:
@@ -68,6 +56,9 @@ def main():
     benchmark_base_100 = calculate_base_100(aligned_benchmark)
 
     print("=== MarketPulse ===")
+    print()
+    print("Provider")
+    print("Yahoo Finance via yfinance")
     print()
     print("Market configuration")
     print(f"Period   : {LOOKBACK_LABEL}")

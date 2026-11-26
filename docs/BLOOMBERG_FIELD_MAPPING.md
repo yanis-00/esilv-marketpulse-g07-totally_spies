@@ -42,6 +42,7 @@ The canonical ticker is the one used by MarketPulse analytics. The Bloomberg ide
 - Input structure: a `series` list; each series has `role`, `canonical_ticker`, `provider_identifier` and an `observations` list
 - Missing fields: none observed in the inspected observations
 - Special normalization notes:
+  - the benchmark series (`SPX Index`) has `volume_value: 0` in the inspected rows, so a volume of 0 is a valid value for an index and must not be treated as missing data;
   - some JSON numbers are integers (for example `low_value: 248`), so `open`, `high`, `low` and `close` must be converted to `float`, and `volume` to `int`;
   - the canonical ticker comes from `canonical_ticker`, so `SPX Index` must not appear in the canonical rows;
   - expected canonical reference: `data/sample/bloomberg_reference_expected.json`.

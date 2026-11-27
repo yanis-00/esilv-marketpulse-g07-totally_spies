@@ -186,77 +186,35 @@ calculate once
 present many times
 ```
 
-## Canonical runtime
+## Run MarketPulse
 
-Terminal:
+From the repository root, create a Python environment and install the direct
+dependencies. These commands use Bash in Linux or GitHub Codespaces.
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 python src/main.py
-```
-
-Dashboard, introduced in TD11:
-
-```bash
 python src/dashboard.py
 ```
 
-These are the two canonical CORE runtime commands.
+Open `http://localhost:8050` locally or use the **Ports** panel in Codespaces
+to open the forwarded port.
 
-The instructor starter repository does not necessarily contain every later-stage student file on day one. Files appear progressively during the lab sequence.
+The default runtime compares AAPL (Apple Inc.) with the S&P 500 using daily
+observations over one month. The terminal and dashboard use the shared
+`build_market_snapshot()` result.
 
-## Installation
+### Bloomberg access mode
 
-The starter TD01-TD02 path uses only the Python standard library.
+The default mode is **Bloomberg stage / APPROVED_SAMPLE**. Both commands use
+the repository's September 2026 teaching fixture and run without a Bloomberg
+terminal, credentials or live market-data access. See the
+[TD09 Bloomberg field mapping](docs/BLOOMBERG_FIELD_MAPPING.md).
 
-Later labs add direct dependencies as required.
-
-When `requirements.txt` contains the dependencies for the current stage:
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-Typical later-stage dependencies include:
-
-```text
-yfinance
-dash
-plotly
-```
-
-The complete dependency model, including standard-library modules, transitive dependencies, Bloomberg environment rules and explicit CORE exclusions, is documented in:
-
-[MarketPulse libraries and dependencies](docs/13_MARKETPULSE_LIBRARIES_AND_DEPENDENCIES.md)
-
-Do not add packages that are not actually required by the implementation.
-
-## Bloomberg teaching modes
-
-The Bloomberg stage supports two authorized classroom modes:
-
-```text
-LIVE
-or
-APPROVED_SAMPLE
-```
-
-`LIVE` means the instructor-approved Bloomberg environment successfully returned data.
-
-`APPROVED_SAMPLE` means the instructor fallback assets were used for mapping and normalization work.
-
-Important:
-
-```text
-APPROVED_SAMPLE
-!=
-LIVE Bloomberg evidence
-```
-
-Instructor reference:
-
-```text
-docs/10_BLOOMBERG_INSTRUCTOR_REFERENCE.md
-```
+The expected results are AAPL **+6.48%**, S&P 500 **+2.15%**, and AAPL
+relative performance **+4.33 percentage points** across 21 common dates.
 
 ## Student Git workflow
 
@@ -357,7 +315,7 @@ Integration and Release
 
 The canonical evidence specification is:
 
-[Checkpoint and evidence contract](docs/04_CHECKPOINTS_AND_EVIDENCE.md)
+[Evidence directory](evidence/README.md). Individual Checkpoint C evidence belongs in `evidence/checkpoint-c/<github-username>/`.
 
 Screenshots complement Git history, execution and explanation. They do not replace them.
 
@@ -400,7 +358,7 @@ TD11
 + src/dashboard.py
 
 TD12
-release validation only
+release validation and reproducible setup
 ```
 
 Target structure:
